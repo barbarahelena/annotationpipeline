@@ -226,6 +226,74 @@
                     "hidden": true
                 }
             }
+        },
+        "pipeline_options": {
+            "title": "Pipeline options",
+            "type": "object",
+            "fa_icon": "fas fa-cogs",
+            "description": "Pipeline specific options.",
+            "properties": {
+                "annotation": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Run annotation step.",
+                    "fa_icon": "fas fa-atom",
+                    "help_text": "If set, the pipeline will run the annotation step (bakta). If not set, the pipeline will only run the assembly step."
+                },
+                "eggnogmapper": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Run eggnogmapper step.",
+                    "fa_icon": "fas fa-egg",
+                    "help_text": "If set, the pipeline will run the eggnogmapper step. If not set, the pipeline will only run the assembly and annotation steps."
+                },
+                "cayman": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Run Cayman step.",
+                    "fa_icon": "fas fa-fish",
+                    "help_text": "If set, the pipeline will run the Cayman step. If not set, the pipeline will only run the assembly and annotation steps."
+                },
+                "diamond": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Run Diamond step.",
+                    "fa_icon": "fas fa-diamond",
+                    "help_text": "If set, the pipeline will run the Diamond step. If not set, the pipeline will only run the assembly and annotation steps."
+                },
+                "bakta_database": {
+                    "type": "string",
+                    "default": false,
+                    "format": "directory-path",
+                    "description": "Path to Bakta database directory.",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "If set, the pipeline will use the specified Bakta database directory"
+                },
+                "cayman_database": {
+                    "type": "string",
+                    "default": false,
+                    "format": "directory-path",
+                    "description": "Path to Cayman database directory.",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "If set, the pipeline will use the specified Cayman hmm database directory"
+                },
+                "vfdb_database": {
+                    "type": "string",
+                    "default": false,
+                    "format": "file-path",
+                    "description": "Path to VFDB database fasta.",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "If set, the pipeline will use the specified VFDB database directory"
+                },
+                "diamond_database": {
+                    "type": "string",
+                    "default": false,
+                    "format": "file-path",
+                    "description": "Path to Diamond database directory.",
+                    "fa_icon": "fas fa-database",
+                    "help_text": "If set, the pipeline will use the specified Diamond database directory"
+                }
+            }
         }
     },
     "allOf": [
@@ -240,6 +308,9 @@
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/pipeline_options"
         }
     ]
 }

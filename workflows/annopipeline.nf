@@ -3,12 +3,21 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { DIAMOND_BLASTP         } from '../modules/nf-core/diamond/blastp/main'
+include { DIAMOND_MAKEDB         } from '../modules/nf-core/diamond/makedb/main' 
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_annopipeline_pipeline'
+
+include { CAYMAN_DOWNLOAD        } from '../modules/local/cayman/download'
+include { CAYMAN_CAYMAN          } from '../modules/local/cayman/cayman'
+include { EGGNOG_DOWNLOAD        } from '../modules/local/eggnog/download'
+include { EGGNOG_MAPPER          } from '../modules/local/eggnog/mapper'
+include { BAKTA_BAKTADBDOWNLOAD  } from '../modules/local/bakta/baktadbdownload/main'
+include { BAKTA_BAKTA            } from '../modules/local/bakta/bakta/main'
+include { VFDB_DOWNLOAD          } from '../modules/local/vfdb_download'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -24,14 +33,94 @@ workflow ANNOPIPELINE {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+    bakta_db = params.bakta_database ? Channel.fromPath( params.bakta_database ) : []
+    cayman_db = params.cayman_database ? Channel.fromPath( params.cayman_database ) : []
+    vfdb_db = params.vfdb_database ? Channel.fromPath( params.vfdb_database ) : []
+    diamond_db = params.diamond_database ? Channel.fromPath( params.diamond_database ) : []
+
     //
-    // MODULE: Run FastQC
+    // MODULE: Bakta
+    // 
+    if ( params.annotation ) {
+        if ( ! bakta_db ){
+            BAKTA_BAKTADBDOWNLOAD()
+            bakta_db = BAKTA_BAKTADBDOWNLOAD.out.db
+        }         
+        BAKTA_BAKTA( 
+            ch_samplesheet, 
+            bakta_db,
+            [],
+            []
+        )
+        ch_annotation = BAKTA_BAKTA.out.faa
+        ch_versions = ch_versions.mix( BAKTA_BAKTA.out.versions )
+    } else{
+        ch_annotation = ch_samplesheet
+    }
+
     //
-    FASTQC (
-        ch_samplesheet
-    )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    // MODULE: EGGNOG Mapper
+    //
+    if ( params.eggnogmapper ) {
+        EGGNOG_DOWNLOAD ()
+        ch_eggnog_db = EGGNOG_DOWNLOAD.out.eggnog
+                            .combine(EGGNOG_DOWNLOAD.out.dmnd)
+                            .combine(EGGNOG_DOWNLOAD.out.taxa)
+                            .combine(EGGNOG_DOWNLOAD.out.pkl)
+                            .collect()
+        EGGNOG_MAPPER (
+            ch_annotation,
+            ch_eggnog_db
+        )
+        ch_versions = ch_versions.mix(EGGNOG_MAPPER.out.versions)
+    }
+
+    // 
+    // MODULE: Cayman
+    //
+    if ( params.cayman ) {
+        if(!cayman_db){
+            CAYMAN_DOWNLOAD()
+            cayman_db = CAYMAN_DOWNLOAD.out.db
+        }
+        CAYMAN_CAYMAN (
+            ch_annotation,
+            cayman_db
+        )
+        ch_versions = ch_versions.mix(CAYMAN_CAYMAN.out.versions)
+    }
+
+    //
+    // MODULE: Diamond
+    //
+    if ( params.diamond ) {
+        if(!vfdb_db && !diamond_db){
+            VFDB_DOWNLOAD ( )
+            vfdb_db = VFDB_DOWNLOAD.out.db
+        }
+        if(! diamond_db ){
+        ch_vfdb_for_makedb = vfdb_db.map { db -> [['id': 'vfdb_db'], db] }
+        DIAMOND_MAKEDB (
+            ch_vfdb_for_makedb,
+            [],
+            [],
+            []
+        )
+        ch_diamond_db = DIAMOND_MAKEDB.out.db
+        ch_versions = ch_versions.mix(DIAMOND_MAKEDB.out.versions)
+        } else{
+            ch_diamond_db = diamond_db.map { db -> [['id': 'diamond_db'], db] }
+        }
+        
+        DIAMOND_BLASTP ( // task.ext: '-e 0.00001 -k 1 --header'
+            ch_annotation,
+            ch_diamond_db,
+            6, // outfmt
+            []
+        )
+        ch_versions = ch_versions.mix(DIAMOND_BLASTP.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(DIAMOND_BLASTP.out.blast.collect{it[1]})
+    }
 
     //
     // Collate and save software versions

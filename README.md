@@ -14,7 +14,6 @@
 
 **annopipeline** is a bioinformatics pipeline that performs functional annotation of genomes and bacterial metagenomes. It annotates proteins using Bakta, and the Bakta output is then used for further functional annotation of the proteins using eggNOG-mapper, Cayman, and VFDB. The pipeline is designed to be flexible and can be run on a variety of platforms, including local machines and clusters.
 
-<!-- 1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))-->
 1. Annotation of genomes using Bakta ([`Bakta`](https://github.com/oschwengers/bakta))
 2. EggNOG functional annotation of the proteins ([`eggNOG-mapper`](https://github.com/eggnogdb/eggnog-mapper))
 3. Cayman carbohydrate active enzymes (CAZy) profiling of proteins ([`Cayman`](https://github.com/zellerlab/cayman))
