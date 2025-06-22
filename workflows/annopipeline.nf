@@ -78,7 +78,11 @@ workflow ANNOPIPELINE {
         )
         ch_versions = ch_versions.mix(EGGNOG_MAPPER.out.versions)
 
-        EGGNOG_CAT ( EGGNOG_MAPPER.out.anno.collect{ it[1] } )
+        EGGNOG_CAT ( 
+            EGGNOG_MAPPER.out.anno
+                .collect { meta, txt -> txt }
+                .map { files -> [['id': 'all_eggnog_results'], files] }
+        )
         ch_versions = ch_versions.mix( EGGNOG_CAT.out.versions )
     }
 
@@ -96,7 +100,11 @@ workflow ANNOPIPELINE {
         )
         ch_versions = ch_versions.mix(CAYMAN_CAYMAN.out.versions)
 
-        CAYMAN_CAT ( CAYMAN_CAYMAN.out.cayman.collect{ it[1] } )
+        CAYMAN_CAT ( 
+            CAYMAN_CAYMAN.out.cayman
+                .collect { meta, txt -> txt }
+                .map { files -> [['id': 'all_cayman_results'], files] }
+        )
         ch_versions = ch_versions.mix(CAYMAN_CAT.out.versions)
     }
 
@@ -131,7 +139,11 @@ workflow ANNOPIPELINE {
         ch_versions = ch_versions.mix(DIAMOND_BLASTP.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(DIAMOND_BLASTP.out.blast.collect{it[1]})
 
-        VFDB_CAT ( DIAMOND_BLASTP.out.txt.collect{ it[1] } )
+        VFDB_CAT ( 
+            DIAMOND_BLASTP.out.txt
+                .collect { meta, txt -> txt }
+                .map { files -> [['id': 'all_vfdb_results'], files] }
+        )
         ch_versions = ch_versions.mix(VFDB_CAT.out.versions)
     }
 
