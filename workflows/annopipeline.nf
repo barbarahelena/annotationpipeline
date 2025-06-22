@@ -13,11 +13,14 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_anno
 
 include { CAYMAN_DOWNLOAD        } from '../modules/local/cayman/download'
 include { CAYMAN_CAYMAN          } from '../modules/local/cayman/cayman'
+include { CAT_CAT as CAYMAN_CAT  } from '../modules/nf-core/cat/cat/main'
 include { EGGNOG_DOWNLOAD        } from '../modules/local/eggnog/download'
 include { EGGNOG_MAPPER          } from '../modules/local/eggnog/mapper'
+include { CAT_CAT as EGGNOG_CAT  } from '../modules/nf-core/cat/cat/main' 
 include { BAKTA_BAKTADBDOWNLOAD  } from '../modules/local/bakta/baktadbdownload/main'
 include { BAKTA_BAKTA            } from '../modules/local/bakta/bakta/main'
-include { VFDB_DOWNLOAD          } from '../modules/local/vfdb_download'
+include { VFDB_DOWNLOAD          } from '../modules/local/vfdb/download'
+include { CAT_CAT as VFDB_CAT    } from '../modules/nf-core/cat/cat/main' 
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,11 +71,15 @@ workflow ANNOPIPELINE {
                             .combine(EGGNOG_DOWNLOAD.out.taxa)
                             .combine(EGGNOG_DOWNLOAD.out.pkl)
                             .collect()
+
         EGGNOG_MAPPER (
             ch_annotation,
             ch_eggnog_db
         )
         ch_versions = ch_versions.mix(EGGNOG_MAPPER.out.versions)
+
+        EGGNOG_CAT ( EGGNOG_MAPPER.out.anno.collect{ it[1] } )
+        ch_versions = ch_versions.mix( EGGNOG_CAT.out.versions )
     }
 
     // 
@@ -88,6 +95,9 @@ workflow ANNOPIPELINE {
             cayman_db
         )
         ch_versions = ch_versions.mix(CAYMAN_CAYMAN.out.versions)
+
+        CAYMAN_CAT ( CAYMAN_CAYMAN.out.cayman.collect{ it[1] } )
+        ch_versions = ch_versions.mix(CAYMAN_CAT.out.versions)
     }
 
     //
@@ -120,6 +130,9 @@ workflow ANNOPIPELINE {
         )
         ch_versions = ch_versions.mix(DIAMOND_BLASTP.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(DIAMOND_BLASTP.out.blast.collect{it[1]})
+
+        VFDB_CAT ( DIAMOND_BLASTP.out.txt.collect{ it[1] } )
+        ch_versions = ch_versions.mix(VFDB_CAT.out.versions)
     }
 
     //
