@@ -78,11 +78,11 @@ workflow ANNOPIPELINE {
         )
         ch_versions = ch_versions.mix(EGGNOG_MAPPER.out.versions)
 
-        EGGNOG_CAT ( 
-            EGGNOG_MAPPER.out.anno
+        ch_eggnog_tables = EGGNOG_MAPPER.out.anno
                 .collect { meta, txt -> txt }
                 .map { files -> [['id': 'all_eggnog_results'], files] }
-        )
+
+        EGGNOG_CAT ( ch_eggnog_tables )
         ch_versions = ch_versions.mix( EGGNOG_CAT.out.versions )
     }
 
