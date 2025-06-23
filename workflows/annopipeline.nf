@@ -136,14 +136,14 @@ workflow ANNOPIPELINE {
             6, // outfmt
             []
         )
+        
         ch_versions = ch_versions.mix(DIAMOND_BLASTP.out.versions)
         ch_multiqc_files = ch_multiqc_files.mix(DIAMOND_BLASTP.out.blast.collect{it[1]})
+        ch_vfdb_files = DIAMOND_BLASTP.out.txt
+                            .collect { meta, txt -> txt }
+                            .map { files -> [['id': 'all_vfdb_results'], files]}
 
-        VFDB_CAT ( 
-            DIAMOND_BLASTP.out.txt
-                .collect { meta, txt -> txt }
-                .map { files -> [['id': 'all_vfdb_results'], files] }
-        )
+        VFDB_CAT ( ch_vfdb_files )
         ch_versions = ch_versions.mix(VFDB_CAT.out.versions)
     }
 
