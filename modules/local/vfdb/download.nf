@@ -16,7 +16,7 @@ process VFDB_DOWNLOAD {
 
     script:
     """
-    curl "https://www.mgc.ac.cn/VFs/Down/VFDB_setB_pro.fas.gz"
+    curl -LO "https://www.mgc.ac.cn/VFs/Down/VFDB_setB_pro.fas.gz" 
     gunzip VFDB_setB_pro.fas.gz
     """
 }
