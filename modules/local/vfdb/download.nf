@@ -5,8 +5,8 @@ process VFDB_DOWNLOAD {
 
     conda "conda-forge::sed=4.7"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
-        'nf-core/ubuntu:20.04' }"
+        'https://depot.galaxyproject.org/singularity/curl%3A7.80.0' :
+        'biocontainers/curl:7.80.0' }"
 
     output:
     path("*.fas"), emit: db
