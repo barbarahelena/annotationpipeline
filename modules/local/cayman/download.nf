@@ -16,6 +16,6 @@ process CAYMAN_DOWNLOAD {
     script:
     """
     curl "https://zenodo.org/records/13998227/files/v3.zip?download=1" -o v3.zip
-    unzip v3.zip -d v3
+    unzip v3.zip -d .
     """
 }
