@@ -2,11 +2,11 @@ process EGGNOG_MAPPER {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::eggnog-mapper=2.1.12"
+    conda "bioconda::eggnog-mapper=2.1.13"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/eggnog-mapper%3A2.1.12--pyhdfd78af_2':
-        'biocontainers/eggnog-mapper:2.1.12--pyhdfd78af_2' }"
-
+        'https://depot.galaxyproject.org/singularity/eggnog-mapper%3A2.1.13--pyhdfd78af_2':
+        'biocontainers/eggnog-mapper:2.1.13--pyhdfd78af_2' }"
+        
     input:
     tuple val(meta), path(faa)
     path(eggnog_files), stageAs: 'eggnog/*'
