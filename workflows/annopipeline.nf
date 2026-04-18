@@ -36,10 +36,10 @@ workflow ANNOPIPELINE {
 
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-    bakta_db = params.bakta_database ? Channel.fromPath( params.bakta_database ) : []
-    cayman_db = params.cayman_database ? Channel.fromPath( params.cayman_database ) : []
-    vfdb_db = params.vfdb_database ? Channel.fromPath( params.vfdb_database ) : []
-    diamond_db = params.diamond_database ? Channel.fromPath( params.diamond_database ) : []
+    bakta_db = params.bakta_database ? Channel.value(file( params.bakta_database )) : []
+    cayman_db = params.cayman_database ? Channel.value(file( params.cayman_database )) : []
+    vfdb_db = params.vfdb_database ? Channel.value(file( params.vfdb_database )) : []
+    diamond_db = params.diamond_database ? Channel.value(file( params.diamond_database )) : []
 
     //
     // MODULE: Bakta
