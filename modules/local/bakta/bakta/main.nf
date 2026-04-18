@@ -43,6 +43,7 @@ process BAKTA_BAKTA {
         $proteins_opt \\
         $prodigal_tf \\
         --skip-trna \\
+        --skip-plot \\
         --db $db
 
     cat <<-END_VERSIONS > versions.yml
